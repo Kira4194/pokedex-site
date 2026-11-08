@@ -379,7 +379,7 @@ function item(c) {
   const busy = uploadingId === c.id;
   const h = HUES[c.id] ?? 220;
   const face = c.photo
-    ? `<div class="holo" data-zoom="${esc(c.id)}" style="--h:${h}" tabindex="0" role="button" aria-label="Agrandir ${esc(c.name)} ${esc(c.number)}"><div class="face"><img src="/_blob/${esc(c.photo)}" alt="Photo de ma carte ${esc(c.name)} ${esc(c.number)}" loading="lazy"></div></div>`
+    ? `<div class="holo" data-zoom="${esc(c.id)}" style="--h:${h}" tabindex="0" role="button" aria-label="Agrandir ${esc(c.name)} ${esc(c.number)}"><div class="face"><img src="${esc(c.photo)}" alt="Photo de ma carte ${esc(c.name)} ${esc(c.number)}" loading="lazy"></div></div>`
     : `<div class="face empty" style="--h:${h}"><div class="ph"><span class="num">${esc(c.number)}</span>${assets
         ? `<button class="add" data-add="${esc(c.id)}" ${busy ? "disabled" : ""}>${busy ? "Envoi…" : "+ Ajouter la photo"}</button>`
         : `<span>Photo à venir</span>`}</div></div>`;
@@ -565,7 +565,7 @@ function showZoom(src, alt, hue, cap) {
 }
 function openZoom(id) {
   const c = cards.find(x => x.id === id); if (!c || !c.photo) return;
-  showZoom("/_blob/" + c.photo, `Photo de ma carte ${c.name} ${c.number}`, HUES[c.id] ?? 220, "");
+  showZoom(c.photo, `Photo de ma carte ${c.name} ${c.number}`, HUES[c.id] ?? 220, "");
 }
 function openDexZoom(st, c) {
   showZoom(imgPath(st, c), `${c.name} ${c.num}`, BGS[bgIndex].hue,
@@ -682,14 +682,14 @@ const localDb = (() => {
   let store = null;
   const load = async () => {
     if (store) return store;
-    try { store = JSON.parse(localStorage.getItem("pokedex-db-v1")); } catch (e) { store = null; }
+    try { store = JSON.parse(localStorage.getItem("pokedex-db-v2")); } catch (e) { store = null; }
     if (!store) {
       const [s, v] = await Promise.all([fetch("data/sets.json").then(r => r.json()), fetch("data/vitrine.json").then(r => r.json())]);
       store = { sets: Object.fromEntries(s.map(x => [x.id, x])), cards: Object.fromEntries(v.map(x => [x.id, x])) };
     }
     return store;
   };
-  const sauver = () => { try { localStorage.setItem("pokedex-db-v1", JSON.stringify(store)); } catch (e) {} };
+  const sauver = () => { try { localStorage.setItem("pokedex-db-v2", JSON.stringify(store)); } catch (e) {} };
   const instantane = col => ({ docs: Object.entries(store[col]).map(([id, data]) => ({ id, data: () => JSON.parse(JSON.stringify(data)) })) });
   return {
     lire: async (col, id) => { await load(); return JSON.parse(JSON.stringify(store[col][id])); },

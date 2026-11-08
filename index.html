@@ -1,0 +1,734 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Cote de mes cartes Pokémon</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&display=swap">
+<style>
+/* Layout: fond illustré flou qui tourne (5 scènes) ; chaque scène impose son thème de couleurs. Panneaux en verre dépoli par-dessus.
+   Onglets : Vitrine (cartes surveillées, holo), Graphiques, Pokédex (une extension à la fois, grille d'images de cartes). */
+:root {
+  /* Thème par défaut = Forêt aux lucioles */
+  --bg: #06201d;
+  --panel: #0b2f2a;
+  --edge: rgba(176, 255, 220, .18);
+  --ink: #ecfff7;
+  --muted: #a7cfc2;
+  --accent: #d4f56a;
+  --accent-ink: #13300f;
+  --accent2: #3fd0c0;
+  --scrim: rgba(3, 18, 16, .55);
+  --up: #6ef0a2;
+  --down: #ff8f8f;
+  --flat: #a7cfc2;
+  --display: "Archivo Black", "Arial Black", Impact, sans-serif;
+  --body: "Instrument Sans", "Segoe UI", Roboto, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --price: "Bricolage Grotesque", "Instrument Sans", system-ui, sans-serif;
+  color-scheme: dark;
+}
+:root[data-bg="nuit"] { --bg: #0a0b2c; --panel: #16174a; --edge: rgba(190, 190, 255, .2); --ink: #f0f1ff; --muted: #b0b5ea; --accent: #ff73b9; --accent-ink: #2a0a20; --accent2: #8fa8ff; --scrim: rgba(6, 6, 30, .55); --flat: #b0b5ea; }
+:root[data-bg="sousbois"] { --bg: #1c2410; --panel: #2c3816; --edge: rgba(255, 240, 160, .2); --ink: #fffbe8; --muted: #d9d8ae; --accent: #ffd84a; --accent-ink: #2e2604; --accent2: #a6d65e; --scrim: rgba(22, 28, 8, .5); --flat: #d9d8ae; }
+:root[data-bg="feu"] { --bg: #1d0e08; --panel: #3a1c12; --edge: rgba(255, 196, 150, .2); --ink: #fff3e6; --muted: #e6bf9e; --accent: #ffa142; --accent-ink: #331604; --accent2: #ff5e47; --scrim: rgba(24, 10, 6, .55); --flat: #e6bf9e; }
+:root[data-bg="crepuscule"] { --bg: #26122a; --panel: #46203a; --edge: rgba(255, 200, 170, .22); --ink: #fff4ec; --muted: #f0c6b0; --accent: #ffb85c; --accent-ink: #36180a; --accent2: #ff7058; --scrim: rgba(30, 12, 26, .5); --flat: #f0c6b0; }
+:root[data-bg="evoli"] { --bg: #0b2233; --panel: #123a4d; --edge: rgba(180, 230, 255, .22); --ink: #f0fbff; --muted: #b4d6e4; --accent: #ffc94d; --accent-ink: #2e2004; --accent2: #f08ac8; --scrim: rgba(6, 22, 34, .5); --flat: #b4d6e4; }
+:root[data-bg="abysses"] { --bg: #021a2e; --panel: #06304d; --edge: rgba(120, 220, 255, .2); --ink: #e8f8ff; --muted: #9cc8de; --accent: #4fe0f0; --accent-ink: #022a33; --accent2: #ff5a6e; --scrim: rgba(2, 14, 28, .55); --flat: #9cc8de; }
+:root[data-bg="verger"] { --bg: #16300f; --panel: #244a18; --edge: rgba(230, 255, 170, .22); --ink: #fbffef; --muted: #d2e6b4; --accent: #ffe14a; --accent-ink: #2f2802; --accent2: #ff7a3d; --scrim: rgba(14, 30, 8, .5); --flat: #d2e6b4; }
+:root[data-bg="neige"] { --bg: #1b2440; --panel: #2a3760; --edge: rgba(210, 225, 255, .24); --ink: #f4f7ff; --muted: #c2cce8; --accent: #ff9a4a; --accent-ink: #331804; --accent2: #7fc4ff; --scrim: rgba(16, 22, 44, .5); --flat: #c2cce8; }
+
+html, body { min-height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; transition: background-color .8s ease; }
+
+/* Fond illustré */
+.scene { position: fixed; inset: 0; z-index: 0; overflow: hidden; background: var(--bg); }
+.scene .layer { position: absolute; inset: -40px; background-size: cover; background-position: center; filter: blur(3px) saturate(1.1) brightness(.78); opacity: 0; transition: opacity 1.6s ease; }
+.scene .layer.on { opacity: 1; }
+.scene::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, var(--scrim) 0%, transparent 30%, var(--scrim) 100%); transition: background .8s ease; }
+@media (prefers-reduced-motion: reduce) { .scene .layer { transition: none; } }
+
+.wrap { position: relative; z-index: 1; max-width: 1120px; margin: 0 auto; padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
+header > * { min-width: 0; }
+.glass { background: color-mix(in srgb, var(--panel) 74%, transparent); border: 1px solid var(--edge); border-radius: 16px;
+  -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2); transition: background-color .8s ease, border-color .8s ease; }
+
+header { display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; }
+.eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+h1 { font-family: var(--display); font-weight: 400; font-size: clamp(30px, 6vw, 50px); line-height: 1; margin: 6px 0 0; color: var(--accent);
+  text-shadow: 0 3px 0 color-mix(in srgb, var(--accent2) 70%, black), 0 10px 30px rgba(0,0,0,.45); letter-spacing: .01em; text-wrap: balance; transition: color .8s ease; }
+.head-right { display: grid; gap: 10px; justify-items: end; }
+.total { display: grid; gap: 3px; text-align: right; padding: 4px 2px; text-shadow: 0 2px 14px color-mix(in srgb, var(--bg) 80%, transparent); }
+.total .k { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; color: var(--muted); }
+.total .v { font-family: var(--price); font-weight: 800; font-size: 46px; line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+.total .v small { font-size: 26px; color: var(--accent); margin-left: 2px; transition: color .8s ease; }
+.total .u { height: 3px; border-radius: 3px; background: linear-gradient(90deg, transparent, var(--accent)); transition: background .8s ease; }
+.total .n { font-size: 12px; color: var(--muted); }
+.sync { font-size: 12px; color: var(--muted); text-align: right; max-width: 340px; text-shadow: 0 2px 10px color-mix(in srgb, var(--bg) 80%, transparent); }
+.sync-btn { font: inherit; font-size: 12px; font-weight: 600; color: var(--accent-ink); background: var(--accent); border: 0; border-radius: 999px; padding: 3px 10px; margin-left: 4px; cursor: pointer; }
+
+/* Choix du fond */
+.bgpick { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 5px 8px; border-radius: 999px; max-width: 100%; }
+.bgpick .lbl { font-size: 12px; color: var(--muted); margin-right: 2px; }
+.bgdot { width: 30px; height: 20px; border-radius: 999px; border: 2px solid transparent; background-size: cover; background-position: center; cursor: pointer; padding: 0; }
+.bgdot[aria-pressed="true"] { border-color: var(--accent); }
+.bgplay { font: inherit; font-size: 12px; font-weight: 600; color: var(--ink); background: transparent; border: 1px solid var(--edge); border-radius: 999px; padding: 2px 9px; cursor: pointer; }
+
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.tab { font: inherit; font-weight: 600; font-size: 14px; color: var(--ink); background: color-mix(in srgb, var(--panel) 60%, transparent); border: 1px solid var(--edge); border-radius: 999px; padding: 8px 16px; cursor: pointer; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.tab:hover { border-color: var(--muted); }
+.tab[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.tab:focus-visible, button:focus-visible, a:focus-visible, summary:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* Vitrine */
+.showcase { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px 18px; perspective: 1000px; }
+@media (max-width: 1000px) { .showcase { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.item { display: grid; gap: 12px; align-content: start; min-width: 0; }
+.holo { position: relative; transform-style: preserve-3d; transition: transform .18s ease-out; border-radius: 4.8% / 3.4%; cursor: zoom-in; }
+.face { position: relative; aspect-ratio: 63 / 88; max-width: 100%; border-radius: 4.8% / 3.4%; overflow: hidden; background: var(--panel);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.14), 0 24px 40px -22px hsl(var(--h) 90% 60% / .9), 0 0 36px -12px hsl(var(--h) 90% 60% / .55); }
+.face img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.face::before, .face::after { content: ""; position: absolute; inset: 0; pointer-events: none; transition: opacity .25s ease; }
+.face::before { mix-blend-mode: color-dodge; opacity: .18;
+  background: linear-gradient(115deg, transparent 15%, hsl(var(--h) 95% 65% / .85) calc(var(--x, 50%) - 14%), hsl(calc(var(--h) + 70) 95% 65% / .85) var(--x, 50%), hsl(calc(var(--h) + 140) 95% 65% / .85) calc(var(--x, 50%) + 14%), transparent 85%); }
+.face::after { mix-blend-mode: soft-light; opacity: 0; background: radial-gradient(circle at var(--x, 50%) var(--y, 30%), rgba(255,255,255,.75), transparent 45%); }
+.holo:hover .face::before, .holo.active .face::before { opacity: .6; }
+.holo:hover .face::after, .holo.active .face::after { opacity: .9; }
+@media (prefers-reduced-motion: reduce) { .holo { transition: none; } }
+.face.empty { display: grid; place-items: center; text-align: center; background: repeating-linear-gradient(135deg, var(--panel) 0 14px, color-mix(in srgb, var(--panel) 70%, black) 14px 28px); border: 2px dashed var(--edge); cursor: default; }
+.face.empty .ph { display: grid; gap: 10px; justify-items: center; color: var(--muted); font-size: 13px; padding: 12px; }
+.face.empty .num { font-family: var(--mono); font-size: 22px; color: var(--ink); }
+
+.label { padding: 10px 12px; display: grid; gap: 5px; }
+.label .name { font-family: var(--display); font-size: 15px; line-height: 1.15; letter-spacing: .01em; text-transform: uppercase; }
+.label .meta { font-size: 12px; color: var(--muted); }
+.label .meta b { font-family: var(--mono); font-weight: 500; color: var(--accent-ink); background: var(--accent); border-radius: 4px; padding: 0 5px; }
+.price-line { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.price { font-family: var(--price); font-size: 22px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
+.date { font-size: 12px; color: var(--muted); }
+.pills { display: flex; gap: 6px; flex-wrap: wrap; }
+.pill { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 1px 8px; border: 1px solid currentColor; white-space: nowrap; }
+.pill.up { color: var(--up); } .pill.down { color: var(--down); } .pill.flat { color: var(--flat); }
+.add { font: inherit; font-weight: 600; font-size: 13px; color: var(--accent-ink); background: var(--accent); border: 0; border-radius: 999px; padding: 7px 14px; cursor: pointer; }
+.add[disabled] { opacity: .65; cursor: progress; }
+details { font-size: 13px; }
+summary { cursor: pointer; color: var(--muted); font-weight: 600; list-style: none; }
+summary::-webkit-details-marker { display: none; }
+summary::before { content: "+ "; color: var(--accent); }
+details[open] summary::before { content: "− "; }
+.rows { display: grid; gap: 4px; margin-top: 8px; }
+.row { display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px dashed var(--edge); padding-bottom: 3px; }
+.row span:last-child { font-family: var(--price); font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
+.na { color: var(--muted); font-family: var(--body) !important; font-style: italic; }
+.links { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+.links a, .links button { font: inherit; font-size: 12px; font-weight: 600; color: var(--ink); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-decoration-color: var(--accent); text-underline-offset: 3px; }
+.src { font-size: 12px; color: var(--muted); }
+.msg { font-size: 12px; color: var(--down); }
+
+/* Zoom */
+.zoom { position: fixed; inset: 0; z-index: 20; background: rgba(0, 0, 0, .78); display: grid; place-items: center; align-content: center; gap: 14px; perspective: 1200px;
+  padding: max(24px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(24px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.zoom .holo { width: min(400px, 80vw, calc((100vh - 200px) * 63 / 88)); cursor: zoom-out; }
+.zoom .cap { text-align: center; display: grid; gap: 2px; padding: 10px 18px; }
+.zoom .cap .name { font-family: var(--display); font-size: 18px; text-transform: uppercase; }
+.zoom .cap .sub { font-size: 13px; color: var(--muted); }
+.zoom .close { position: absolute; top: max(14px, env(safe-area-inset-top, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); font: inherit; font-weight: 600; background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 999px; padding: 8px 14px; cursor: pointer; }
+
+/* Graphiques */
+.charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 14px; }
+.chart { padding: 16px; display: grid; gap: 8px; min-width: 0; }
+.chart-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.chart .name { font-family: var(--display); font-size: 16px; text-transform: uppercase; }
+.chart svg { width: 100%; height: auto; display: block; }
+.chart svg text { fill: var(--muted); font-family: var(--mono); font-size: 11px; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+.legend i { display: inline-block; width: 16px; height: 0; border-top: 2px solid var(--accent); vertical-align: middle; margin-right: 6px; }
+.legend i.a30 { border-top: 2px dotted var(--ink); }
+
+/* Pokédex */
+.dex { display: grid; gap: 18px; }
+.sets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.setbtn { font: inherit; color: var(--ink); text-align: left; cursor: pointer; padding: 14px 16px; display: grid; gap: 6px; min-width: 0; }
+.setbtn .t { font-family: var(--display); font-size: 17px; line-height: 1.1; text-transform: uppercase; }
+.setbtn .c { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.setbtn .s { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--muted); }
+.setbtn .s b { color: var(--ink); font-family: var(--price); font-weight: 800; }
+.setbtn[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent) inset; }
+.track { height: 8px; border-radius: 999px; background: rgba(0,0,0,.35); overflow: hidden; }
+.track span { display: block; height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); border-radius: inherit; }
+
+.dex-sum { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.stat { padding: 12px 16px; display: grid; gap: 2px; min-width: 0; }
+.stat .k { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.stat .v { font-family: var(--price); font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.stat .v small { font-size: 14px; color: var(--muted); }
+.stat .n { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stat.hi { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.stat.hi .k, .stat.hi .n { color: var(--accent-ink); opacity: .8; }
+
+.rar-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.rchip { font-size: 12px; padding: 3px 10px; border-radius: 999px; background: color-mix(in srgb, var(--panel) 70%, transparent); border: 1px solid var(--edge); color: var(--muted); }
+.rchip b { color: var(--ink); font-family: var(--mono); font-weight: 500; }
+
+.dex-bar { display: flex; gap: 10px 14px; flex-wrap: wrap; align-items: center; padding: 10px 12px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { font: inherit; font-size: 13px; font-weight: 600; color: var(--muted); background: transparent; border: 1px solid var(--edge); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+.chip:hover { color: var(--ink); }
+.chip[aria-pressed="true"] { color: var(--accent-ink); background: var(--accent); border-color: var(--accent); }
+.search { font: inherit; font-size: 14px; color: var(--ink); background: rgba(0,0,0,.25); border: 1px solid var(--edge); border-radius: 999px; padding: 5px 12px; min-width: 0; flex: 1 1 160px; max-width: 260px; }
+.search::placeholder { color: var(--muted); }
+.spacer { flex: 1 1 auto; }
+.edit-toggle { font: inherit; font-size: 13px; font-weight: 600; color: var(--ink); background: transparent; border: 1px dashed var(--muted); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+.edit-toggle[aria-pressed="true"] { background: var(--accent2); color: var(--accent-ink); border: 1px solid var(--accent2); }
+.dex-hint { font-size: 13px; color: var(--ink); margin: 0; padding: 8px 12px; }
+.dex-hint b { color: var(--accent); }
+
+.dex-section { display: grid; gap: 10px; }
+.dex-section h2 { font-family: var(--display); font-weight: 400; font-size: 18px; margin: 0; letter-spacing: .02em; text-transform: uppercase; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; text-shadow: 0 2px 10px rgba(0,0,0,.5); }
+.dex-section h2 span { font-family: var(--mono); font-size: 13px; color: var(--muted); text-transform: none; letter-spacing: 0; }
+.grid-dex { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 14px 12px; }
+.dc { font: inherit; color: var(--ink); background: none; border: 0; padding: 0; text-align: left; display: grid; gap: 6px; min-width: 0; cursor: zoom-in; }
+.dc .pic { position: relative; aspect-ratio: 214 / 298; max-width: 100%; border-radius: 6.5% / 4.7%; overflow: hidden; background: rgba(0,0,0,.3); box-shadow: 0 10px 22px -12px rgba(0,0,0,.8); transition: transform .15s ease; }
+.dc .pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.dc:hover .pic { transform: translateY(-3px); }
+.dc .meta { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 10px; background: color-mix(in srgb, var(--panel) 78%, transparent); border: 1px solid var(--edge); }
+.dc .no { font-family: var(--mono); font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.dc .pr { font-family: var(--price); font-size: 14px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.dc.miss .pic img { filter: grayscale(1) brightness(.9); opacity: .6; }
+.dc.miss .pic::after { content: "Manquante"; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ink); background: rgba(0,0,0,.55); padding: 3px 8px; border-radius: 999px; white-space: nowrap; }
+.dc.miss .pr { color: var(--muted); }
+.dc .seen { position: absolute; top: 6px; left: 6px; font-size: 10.5px; font-weight: 600; color: var(--accent-ink); background: var(--accent); border-radius: 999px; padding: 1px 7px; }
+.editing .dc { cursor: pointer; }
+.editing .dc .pic { outline: 2px dashed var(--accent2); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .dc .pic { transition: none; } .dc:hover .pic { transform: none; } }
+
+.note { font-size: 13px; color: var(--muted); max-width: 78ch; padding: 10px 14px; }
+.note b { color: var(--ink); }
+.empty-state { grid-column: 1 / -1; text-align: center; padding: 48px 16px; color: var(--muted); }
+
+@media (max-width: 680px) { .showcase { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 16px; } }
+@media (max-width: 860px) { .dex-sum { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 620px) {
+  .wrap { gap: 16px; padding-block: 18px 40px; }
+  .sets { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .head-right { justify-items: start; } .sync { text-align: left; } .total { text-align: left; }
+  .total .v { font-size: 38px; } .total .v small { font-size: 22px; }
+  .bgpick { gap: 5px; padding: 4px 6px; border-radius: 14px; }
+  .bgpick .lbl { display: none; }
+  .bgdot { width: 22px; height: 16px; }
+  .eyebrow { font-size: 10.5px; letter-spacing: .07em; }
+  .tab { flex: 1 1 0; text-align: center; padding: 8px 10px; }
+  .setbtn { grid-template-columns: minmax(0, 1fr) auto; column-gap: 10px; padding: 10px 12px; gap: 5px 10px; }
+  .setbtn .t { font-size: 15px; } .setbtn .c { align-self: center; }
+  .setbtn .track, .setbtn .s { grid-column: 1 / -1; }
+  .dex-sum { gap: 8px; } .stat { padding: 10px 12px; } .stat .v { font-size: 21px; }
+  .dex-bar { padding: 10px; gap: 8px; }
+  .search { order: -1; flex: 1 1 100%; max-width: none; font-size: 16px; padding: 7px 14px; }
+  .spacer { display: none; }
+  .edit-toggle { flex: 1 1 100%; padding: 8px 12px; }
+  .chart { padding: 12px; }
+}
+@media (max-width: 460px) {
+  .showcase { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 10px; }
+  .label { padding: 8px 9px; gap: 4px; }
+  .label .name { font-size: 13px; }
+  .price { font-size: 19px; } .date { font-size: 11px; }
+  .pill { font-size: 10px; padding: 1px 6px; }
+  .face.empty .num { font-size: 18px; } .add { font-size: 12px; padding: 6px 10px; }
+  details { font-size: 12px; } .row { flex-wrap: wrap; }
+  .grid-dex { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 8px; }
+  .dc .meta { flex-direction: column; align-items: flex-start; gap: 0; padding: 3px 6px; }
+}
+@media (max-width: 340px) { .showcase { grid-template-columns: minmax(0, 1fr); } }
+</style>
+
+<div class="scene" id="scene" aria-hidden="true"><div class="layer" id="layer-a"></div><div class="layer" id="layer-b"></div></div>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">30e Anniversaire · Nuit Noire · Méga-Évolution</div>
+      <h1>Ma vitrine de cartes</h1>
+    </div>
+    <div class="head-right">
+      <div class="total" id="total"><span class="k">Valeur de la vitrine</span><span class="v">—</span><span class="u"></span><span class="n">Chargement…</span></div>
+      <div class="sync" id="sync" role="status" aria-live="polite" hidden></div>
+      <div class="bgpick glass" id="bgpick" role="group" aria-label="Fond d'écran"><span class="lbl">Fond</span></div>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Vues">
+    <button class="tab" role="tab" id="tab-cartes" aria-selected="true" aria-controls="vitrine">Vitrine</button>
+    <button class="tab" role="tab" id="tab-graphiques" aria-selected="false" aria-controls="charts">Graphiques</button>
+    <button class="tab" role="tab" id="tab-pokedex" aria-selected="false" aria-controls="pokedex">Pokédex</button>
+  </nav>
+
+  <section class="showcase" id="vitrine" role="tabpanel" aria-labelledby="tab-cartes">
+    <div class="empty-state glass">Ouverture de la vitrine… Vos cartes apparaissent ici dès que les relevés sont chargés.</div>
+  </section>
+
+  <section class="charts" id="charts" role="tabpanel" aria-labelledby="tab-graphiques" hidden></section>
+
+  <section class="dex" id="pokedex" role="tabpanel" aria-labelledby="tab-pokedex" hidden>
+    <div class="sets" id="sets" role="group" aria-label="Extension"></div>
+    <div class="dex-sum" id="dex-sum"></div>
+    <div class="rar-row" id="rar-row"></div>
+    <div class="dex-bar glass">
+      <div class="chips" role="group" aria-label="Afficher">
+        <button class="chip" data-f="all" aria-pressed="true">Toutes</button>
+        <button class="chip" data-f="own" aria-pressed="false">Possédées</button>
+        <button class="chip" data-f="miss" aria-pressed="false">Manquantes</button>
+      </div>
+      <div class="chips" role="group" aria-label="Trier">
+        <button class="chip" data-s="num" aria-pressed="true">N°</button>
+        <button class="chip" data-s="price" aria-pressed="false">Prix</button>
+      </div>
+      <input class="search" id="dex-q" type="search" placeholder="Chercher un Pokémon" aria-label="Chercher une carte par nom">
+      <span class="spacer"></span>
+      <button class="edit-toggle" id="dex-edit" aria-pressed="false">Cocher mes nouvelles cartes</button>
+    </div>
+    <p class="dex-hint glass" id="dex-hint" hidden>Mode coche activé : <b>touchez une carte</b> pour la passer de manquante à possédée, ou l'inverse. Le changement est enregistré tout de suite.</p>
+    <div id="dex-list"><div class="empty-state glass">Le Pokédex apparaît ici dès qu'il est chargé.</div></div>
+  </section>
+
+  <p class="note glass" id="note-vitrine"><b>Comment lire la vitrine.</b> Passez la souris ou le doigt sur une carte pour la faire briller, touchez-la pour l'agrandir. Le prix affiché est la moyenne des ventes Cardmarket sur 7 jours, en euros. Le prix est relevé chaque matin dans le guide des prix officiel de Cardmarket ; la page le lit toute seule à l'ouverture. Les pastilles comparent ce prix au relevé précédent et à la moyenne sur 30 jours. Les photos sont les vôtres ; gardez cette page privée.</p>
+  <p class="note glass" id="note-dex" hidden><b>D'où viennent les prix du Pokédex.</b> Chaque matin, le prix de vente moyen Cardmarket de chaque carte, possédée ou manquante, est relevé chaque matin ; la page le lit toute seule à l'ouverture. Les cartes marquées <b>Suivie</b> sont celles de votre vitrine : elles gardent leur moyenne 7 jours, pour avoir le même prix partout.</p>
+  <input type="file" id="picker" accept="image/*" hidden>
+</div>
+
+<div class="zoom" id="zoom" hidden role="dialog" aria-modal="true" aria-label="Carte agrandie">
+  <button class="close" id="zoom-close">Fermer</button>
+  <div class="holo" id="zoom-card"></div>
+  <div class="cap glass" id="zoom-cap" hidden></div>
+</div>
+
+<script>
+// ---------- Fonds et thèmes ----------
+const BGS = [
+  { id: "luciole", name: "Forêt aux lucioles", hue: 160 },
+  { id: "nuit", name: "Nuit en ville", hue: 250 },
+  { id: "sousbois", name: "Sous-bois", hue: 70 },
+  { id: "feu", name: "Coin du feu", hue: 25 },
+  { id: "crepuscule", name: "Crépuscule", hue: 15 },
+  { id: "evoli", name: "Évoli au lac", hue: 200 },
+  { id: "abysses", name: "Abysses", hue: 190 },
+  { id: "verger", name: "Verger", hue: 55 },
+  { id: "neige", name: "Neige", hue: 220 }
+];
+const ROTATE_MS = 90000;
+let bgIndex = 0, bgTimer = null, bgAuto = true, layerOn = "a";
+try { const s = JSON.parse(localStorage.getItem("fond") || "null"); if (s) { const i = BGS.findIndex(b => b.id === s.id); if (i >= 0) bgIndex = i; bgAuto = s.auto !== false; } } catch (e) {}
+function setBg(i, instant) {
+  bgIndex = (i + BGS.length) % BGS.length;
+  const b = BGS[bgIndex];
+  const next = layerOn === "a" ? "b" : "a";
+  const el = document.getElementById("layer-" + next), old = document.getElementById("layer-" + layerOn);
+  el.style.backgroundImage = `url("bg/${b.id}.jpg")`;
+  if (instant) { el.style.transition = "none"; requestAnimationFrame(() => { el.style.transition = ""; }); }
+  el.classList.add("on"); old.classList.remove("on"); layerOn = next;
+  document.documentElement.dataset.bg = b.id;
+  document.querySelectorAll(".bgdot").forEach((d, k) => d.setAttribute("aria-pressed", k === bgIndex));
+  try { localStorage.setItem("fond", JSON.stringify({ id: b.id, auto: bgAuto })); } catch (e) {}
+}
+function startRotation() { clearInterval(bgTimer); if (bgAuto && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) bgTimer = setInterval(() => setBg(bgIndex + 1), ROTATE_MS); }
+(function buildPicker() {
+  const p = document.getElementById("bgpick");
+  BGS.forEach((b, i) => {
+    const d = document.createElement("button");
+    d.className = "bgdot"; d.style.backgroundImage = `url("bg/${b.id}.jpg")`; d.setAttribute("aria-label", "Fond " + b.name); d.title = b.name;
+    d.addEventListener("click", () => { setBg(i); startRotation(); });
+    p.appendChild(d);
+  });
+  const play = document.createElement("button");
+  play.className = "bgplay"; play.id = "bgplay";
+  const label = () => { play.textContent = bgAuto ? "Pause" : "Défiler"; play.setAttribute("aria-label", bgAuto ? "Arrêter le défilement des fonds" : "Faire défiler les fonds"); };
+  label();
+  play.addEventListener("click", () => { bgAuto = !bgAuto; label(); setBg(bgIndex, true); startRotation(); });
+  p.appendChild(play);
+})();
+setBg(bgIndex, true); startRotation();
+
+// ---------- Outils ----------
+const HUES = { "ectoplasma-154": 275, "nymphali-153": 325, "mega-darkrai-116": 235, "mew-158": 300, "mew-152": 340, "mega-lugulabre-115": 265 };
+const fmt = (v, cur) => v == null ? "—" : new Intl.NumberFormat("fr-FR", { style: "currency", currency: cur || "EUR", maximumFractionDigits: 2 }).format(v);
+const fmtDate = d => d ? new Date(d + "T12:00:00").toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) : "";
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const pct = (a, b) => (a == null || !b) ? null : (a - b) / b * 100;
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+// Sur téléphone, les graphiques sont dessinés plus étroits pour que les textes restent lisibles
+const narrowMQ = window.matchMedia("(max-width: 620px)");
+if (narrowMQ.addEventListener) narrowMQ.addEventListener("change", () => { if (cards.length) render(); });
+function pill(p, label) {
+  if (p == null) return "";
+  const cls = Math.abs(p) < 1 ? "flat" : p > 0 ? "up" : "down";
+  const arrow = cls === "up" ? "▲" : cls === "down" ? "▼" : "■";
+  return `<span class="pill ${cls}">${arrow} ${p > 0 ? "+" : ""}${p.toFixed(1).replace(".", ",")} % ${label}</span>`;
+}
+
+let db = null, assets = null, cards = [], uploadingId = null, errors = {};
+
+// ---------- Vitrine ----------
+function item(c) {
+  const hist = c.history || [];
+  const cur = hist[hist.length - 1], prev = hist.length > 1 ? hist[hist.length - 2] : null;
+  const busy = uploadingId === c.id;
+  const h = HUES[c.id] ?? 220;
+  const face = c.photo
+    ? `<div class="holo" data-zoom="${esc(c.id)}" style="--h:${h}" tabindex="0" role="button" aria-label="Agrandir ${esc(c.name)} ${esc(c.number)}"><div class="face"><img src="/_blob/${esc(c.photo)}" alt="Photo de ma carte ${esc(c.name)} ${esc(c.number)}" loading="lazy"></div></div>`
+    : `<div class="face empty" style="--h:${h}"><div class="ph"><span class="num">${esc(c.number)}</span>${assets
+        ? `<button class="add" data-add="${esc(c.id)}" ${busy ? "disabled" : ""}>${busy ? "Envoi…" : "+ Ajouter la photo"}</button>`
+        : `<span>Photo à venir</span>`}</div></div>`;
+  return `<article class="item">
+    ${face}
+    <div class="label glass">
+      <div class="name">${esc(c.name)}</div>
+      <div class="meta"><b>${esc(c.number)}</b> · ${esc(c.set)}</div>
+      <div class="price-line"><span class="price">${cur ? fmt(cur.v, c.currency) : "—"}</span><span class="date">${cur ? "relevé du " + fmtDate(cur.d) : ""}</span></div>
+      <div class="pills">${pill(prev ? pct(cur.v, prev.v) : null, "vs veille")}${pill(pct(cur?.v, c.avg30), "vs 30 j")}</div>
+      ${errors[c.id] ? `<div class="msg">${esc(errors[c.id])}</div>` : ""}
+      <details>
+        <summary>Détails</summary>
+        <div class="rows">
+          <div class="row"><span>Moyenne 30 jours</span><span>${c.avg30 != null ? fmt(c.avg30) : '<span class="na">n. d.</span>'}</span></div>
+          ${c.target ? `<div class="row"><span>Prix cible de vente</span><span>${fmt(c.target)}</span></div>` : ""}
+        </div>
+        <div class="src" style="margin-top:6px">${esc(c.source)}</div>
+        <div class="links">
+          ${c.link ? `<a href="${esc(c.link)}" target="_blank" rel="noopener">Voir la carte en ligne</a>` : ""}
+          ${assets && c.photo ? `<button data-add="${esc(c.id)}">Changer la photo</button><button data-remove="${esc(c.id)}">Retirer la photo</button>` : ""}
+        </div>
+      </details>
+    </div>
+  </article>`;
+}
+
+function bigChart(c) {
+  const pts = (c.history || []).filter(h => typeof h.v === "number");
+  const narrow = narrowMQ.matches;
+  const W = narrow ? 360 : 560, H = narrow ? 230 : 240, L = narrow ? 46 : 58, R = narrow ? 12 : 16, T = 14, B = 30;
+  const refs = [c.avg30].filter(v => typeof v === "number");
+  const vals = pts.map(p => p.v).concat(refs);
+  if (!vals.length) return `<div class="src">Pas encore de relevé.</div>`;
+  let min = Math.min(...vals), max = Math.max(...vals);
+  const padV = (max - min) * 0.12 || max * 0.1 || 1; min = Math.max(0, min - padV); max = max + padV;
+  const y = v => T + (max - v) / (max - min) * (H - T - B);
+  const n = pts.length;
+  const x = i => n < 2 ? (L + W - R) / 2 : L + i * (W - L - R) / (n - 1);
+  const ticks = [0, 1, 2, 3, 4].map(k => min + (max - min) * k / 4);
+  const grid = ticks.map(t => `<line x1="${L}" x2="${W - R}" y1="${y(t).toFixed(1)}" y2="${y(t).toFixed(1)}" stroke="var(--edge)" stroke-width="1"/><text x="${L - 8}" y="${(y(t) + 4).toFixed(1)}" text-anchor="end">${Math.round(t)} €</text>`).join("");
+  const ref = (v, dash, color, label) => typeof v === "number" ? `<line x1="${L}" x2="${W - R}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="${color}" stroke-width="1.5" stroke-dasharray="${dash}"><title>${label} : ${fmt(v)}</title></line>` : "";
+  const path = pts.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p.v).toFixed(1)}`).join(" ");
+  const line = n > 1 ? `<path d="${path} L${x(n - 1).toFixed(1)},${H - B} L${x(0).toFixed(1)},${H - B} Z" fill="var(--accent)" fill-opacity=".14"/><path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>` : "";
+  const step = Math.max(1, Math.ceil(n / (narrow ? 4 : 6)));
+  const dots = pts.map((p, i) => `<circle cx="${x(i).toFixed(1)}" cy="${y(p.v).toFixed(1)}" r="${i === n - 1 ? 5 : 3.5}" fill="var(--accent)" stroke="var(--panel)" stroke-width="2"><title>${fmtDate(p.d)} : ${fmt(p.v)}</title></circle>` + (((i % step === 0 && n - 1 - i >= step) || i === n - 1) ? `<text x="${x(i).toFixed(1)}" y="${H - 10}" text-anchor="${n > 1 && i === 0 ? "start" : n > 1 && i === n - 1 ? "end" : "middle"}">${fmtDate(p.d)}</text>` : "")).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Évolution du prix de ${esc(c.name)} ${esc(c.number)}">${grid}${ref(c.avg30, "2 4", "var(--ink)", "Moyenne 30 jours")}${line}${dots}</svg>`;
+}
+
+function render() {
+  const el = document.getElementById("vitrine");
+  if (!cards.length) { el.innerHTML = `<div class="empty-state glass">Aucune carte enregistrée pour l'instant.</div>`; return; }
+  el.innerHTML = cards.map(item).join("");
+  let total = 0, last = "";
+  cards.forEach(c => { const h = c.history || []; const cur = h[h.length - 1]; if (cur) { total += cur.v; if (cur.d > last) last = cur.d; } });
+  document.getElementById("total").innerHTML = `<span class="k">Valeur de la vitrine</span><span class="v">${fmt(total).replace(/[\s  ]*€\s*$/, "")}<small>€</small></span><span class="u"></span><span class="n">${cards.length} cartes · relevé du ${fmtDate(last)}</span>`;
+  document.getElementById("charts").innerHTML = cards.map(c => {
+    const h = c.history || [], cur = h[h.length - 1];
+    return `<article class="chart glass">
+      <div class="chart-head"><div><div class="name">${esc(c.name)}</div><div class="src">${esc(c.number)} · ${esc(c.set)}</div></div><div class="price">${cur ? fmt(cur.v) : "—"}</div></div>
+      ${bigChart(c)}
+      <div class="legend"><span><i></i>Moyenne 7 j, un point par jour</span>${c.avg30 != null ? '<span><i class="a30"></i>Moyenne 30 j</span>' : ""}</div>
+      <div class="src">${h.length < 2 ? `${h.length} relevé pour l'instant : la courbe se dessine à partir du 2e.` : `${h.length} relevés depuis le ${fmtDate(h[0].d)}`}</div>
+    </article>`;
+  }).join("");
+  renderDex();
+}
+
+// ---------- Pokédex ----------
+const RNAME = { "C": "Commune", "U": "Peu commune", "R": "Rare", "H": "Holo", "DR": "Double rare", "IR": "Illustration rare", "UR": "Ultra rare", "SIR": "Illustration spéciale", "MHR": "Méga hyper rare", "FR": "Futuriste", "-": "Pikachu spécial", "Secrète": "Classique", "RGB": "Mew RGB" };
+const RORDER = ["C", "U", "R", "H", "-", "DR", "IR", "UR", "SIR", "FR", "MHR", "Secrète", "RGB"];
+const SECTIONS = { main: "Set principal", classic: "Collection classique", rgb: "Mew RGB" };
+let sets = [], curSet = "30C", dexFilter = "all", dexSort = "num", dexQ = "", dexEdit = false, dexErr = "";
+try { const s = JSON.parse(localStorage.getItem("dex") || "null"); if (s) { curSet = s.set || curSet; dexFilter = s.f || dexFilter; dexSort = s.s || dexSort; } } catch (e) {}
+const saveDexPrefs = () => { try { localStorage.setItem("dex", JSON.stringify({ set: curSet, f: dexFilter, s: dexSort })); } catch (e) {} };
+
+function watched(setName) {
+  const s = new Set();
+  cards.forEach(c => { if ((c.set || "") === setName) s.add(String(c.number || "")); });
+  return s;
+}
+function setStats(st) {
+  const cs = st.cards || [], own = cs.filter(c => c.own);
+  const value = own.reduce((a, c) => a + (c.price || 0), 0);
+  const top = own.slice().sort((a, b) => (b.price || 0) - (a.price || 0))[0];
+  const missValue = cs.filter(c => !c.own).reduce((a, c) => a + (c.price || 0), 0);
+  return { total: cs.length, own: own.length, value, top, missValue };
+}
+function renderDex() {
+  const setsEl = document.getElementById("sets"), list = document.getElementById("dex-list");
+  if (!sets.length) { list.innerHTML = `<div class="empty-state glass">${db ? "Chargement du Pokédex…" : "Le Pokédex n'est pas accessible depuis cet affichage. Ouvrez la page connecté à votre compte Claude."}</div>`; return; }
+  if (!sets.find(s => s.id === curSet)) curSet = sets[0].id;
+  setsEl.innerHTML = sets.map(s => {
+    const k = setStats(s), p = k.total ? Math.round(k.own / k.total * 100) : 0;
+    return `<button class="setbtn glass" data-set="${esc(s.id)}" aria-pressed="${s.id === curSet}">
+      <span class="t">${esc(s.name)}</span><span class="c">${esc(s.code || "")}</span>
+      <span class="track" role="img" aria-label="${k.own} cartes sur ${k.total}"><span style="width:${p}%"></span></span>
+      <span class="s"><span><b>${k.own}</b>/${k.total} · ${p} %</span><span><b>${fmt(k.value)}</b></span></span>
+    </button>`;
+  }).join("");
+  const st = sets.find(s => s.id === curSet), k = setStats(st), cs = st.cards || [];
+  document.getElementById("dex-sum").innerHTML = `
+    <div class="stat glass hi"><span class="k">Valeur de mes cartes</span><span class="v">${fmt(k.value)}</span><span class="n">prix du ${fmtDate(st.priceDate)}</span></div>
+    <div class="stat glass"><span class="k">Complétion</span><span class="v">${k.own} <small>/ ${k.total}</small></span><span class="n">${Math.round(k.own / (k.total || 1) * 100)} % · ${k.total - k.own} à trouver</span></div>
+    <div class="stat glass"><span class="k">Ma plus chère</span><span class="v">${k.top ? fmt(k.top.price) : "—"}</span><span class="n">${k.top ? esc(k.top.name) + " " + esc(k.top.num) : "Aucune carte"}</span></div>
+    <div class="stat glass"><span class="k">Pour compléter</span><span class="v">${fmt(k.missValue)}</span><span class="n">au prix moyen actuel</span></div>
+    ${dexErr ? `<div class="stat glass" style="grid-column:1/-1"><span class="msg">${esc(dexErr)}</span></div>` : ""}`;
+  const rars = RORDER.filter(r => cs.some(c => c.rar === r)).concat([...new Set(cs.map(c => c.rar))].filter(r => !RORDER.includes(r)));
+  document.getElementById("rar-row").innerHTML = rars.map(r => { const all = cs.filter(c => c.rar === r); return `<span class="rchip">${esc(RNAME[r] || r)} <b>${all.filter(c => c.own).length}/${all.length}</b></span>`; }).join("");
+  const seen = watched(st.name);
+  const q = dexQ.trim().toLowerCase();
+  const keep = c => (dexFilter === "own" ? c.own : dexFilter === "miss" ? !c.own : true) && (!q || c.name.toLowerCase().includes(q) || c.num.includes(q));
+  const sorter = dexSort === "price" ? (a, b) => (b.price || 0) - (a.price || 0) : (a, b) => a.n - b.n;
+  const groups = dexSort === "price" ? [["all", ""]] : Object.entries(SECTIONS).filter(([s]) => cs.some(c => c.sec === s));
+  const html = groups.map(([sec, title]) => {
+    const inSec = sec === "all" ? cs : cs.filter(c => c.sec === sec);
+    const shown = inSec.filter(keep).sort(sorter);
+    if (!shown.length) return "";
+    const head = groups.length > 1 ? `<h2>${esc(title)} <span>${inSec.filter(c => c.own).length}/${inSec.length}</span></h2>` : "";
+    return `<section class="dex-section">${head}<div class="grid-dex">${shown.map(c => tile(st, c, seen.has(c.num))).join("")}</div></section>`;
+  }).join("");
+  list.className = dexEdit ? "editing" : "";
+  list.innerHTML = html ? `<div class="dex">${html}</div>` : `<div class="empty-state glass">${dexFilter === "miss" && !q ? "Il ne vous manque aucune carte. Extension complète !" : "Aucune carte ne correspond."}</div>`;
+  document.querySelectorAll(".chip[data-f]").forEach(b => b.setAttribute("aria-pressed", b.dataset.f === dexFilter));
+  document.querySelectorAll(".chip[data-s]").forEach(b => b.setAttribute("aria-pressed", b.dataset.s === dexSort));
+}
+function imgPath(st, c) { return `img/${st.id}/${String(c.n).padStart(3, "0")}.webp?v=hd`; }
+function tile(st, c, seen) {
+  const label = `${c.name} ${c.num}, ${c.own ? "possédée" : "manquante"}${c.price != null ? ", " + fmt(c.price) : ""}`;
+  return `<button class="dc${c.own ? "" : " miss"}" data-card="${esc(st.id)}:${c.n}" aria-label="${esc(label)}${dexEdit ? ". Toucher pour changer." : ". Agrandir."}"${dexEdit ? ` aria-pressed="${!!c.own}"` : ""}>
+    <span class="pic"><img src="${imgPath(st, c)}" alt="" loading="lazy" decoding="async" onerror="this.style.display='none'">${seen ? '<span class="seen">Suivie</span>' : ""}</span>
+    <span class="meta"><span class="no">${esc(c.num)}</span><span class="pr">${c.price != null ? fmt(c.price) : "—"}</span></span>
+  </button>`;
+}
+document.getElementById("sets").addEventListener("click", e => { const b = e.target.closest("[data-set]"); if (!b) return; curSet = b.dataset.set; saveDexPrefs(); renderDex(); });
+document.querySelectorAll(".chip[data-f]").forEach(b => b.addEventListener("click", () => { dexFilter = b.dataset.f; saveDexPrefs(); renderDex(); }));
+document.querySelectorAll(".chip[data-s]").forEach(b => b.addEventListener("click", () => { dexSort = b.dataset.s; saveDexPrefs(); renderDex(); }));
+document.getElementById("dex-q").addEventListener("input", e => { dexQ = e.target.value; renderDex(); });
+document.getElementById("dex-edit").addEventListener("click", e => {
+  dexEdit = !dexEdit; e.currentTarget.setAttribute("aria-pressed", dexEdit);
+  e.currentTarget.textContent = dexEdit ? "Terminer" : "Cocher mes nouvelles cartes";
+  document.getElementById("dex-hint").hidden = !dexEdit; renderDex();
+});
+let saving = Promise.resolve();
+document.getElementById("dex-list").addEventListener("click", e => {
+  const t = e.target.closest("[data-card]"); if (!t) return;
+  const [sid, n] = t.dataset.card.split(":"); const st = sets.find(s => s.id === sid); if (!st) return;
+  const c = st.cards.find(x => x.n === +n); if (!c) return;
+  if (!dexEdit) { openDexZoom(st, c); return; }
+  if (!db) return;
+  // Les données reçues de la base sont en lecture seule : on construit une nouvelle liste au lieu de modifier la carte.
+  const prev = st.cards;
+  const next = prev.map(x => x.n === c.n ? { ...x, own: !x.own } : { ...x });
+  st.cards = next; dexErr = ""; renderDex();
+  saving = saving.then(() => db.doc("sets/" + sid).update({ cards: next })).catch(() => {
+    const cur = sets.find(s => s.id === sid);
+    if (cur && cur.cards === next) cur.cards = prev;
+    dexErr = "Changement non enregistré. Vérifiez votre connexion et réessayez."; renderDex();
+  });
+});
+
+// ---------- Effet holo et agrandissement ----------
+function tilt(el, e) {
+  const r = el.getBoundingClientRect();
+  const px = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), py = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height));
+  const face = el.querySelector(".face");
+  if (face) { face.style.setProperty("--x", (px * 100).toFixed(1) + "%"); face.style.setProperty("--y", (py * 100).toFixed(1) + "%"); }
+  el.classList.add("active");
+  if (!reduceMotion) el.style.transform = `rotateY(${((px - .5) * 18).toFixed(1)}deg) rotateX(${((.5 - py) * 18).toFixed(1)}deg)`;
+}
+function untilt(el) { el.classList.remove("active"); el.style.transform = ""; }
+document.addEventListener("pointermove", e => { const el = e.target.closest(".holo"); if (el) tilt(el, e); });
+document.addEventListener("pointerout", e => { const el = e.target.closest(".holo"); if (el && !el.contains(e.relatedTarget)) untilt(el); });
+
+const zoom = document.getElementById("zoom"), zoomCard = document.getElementById("zoom-card"), zoomCap = document.getElementById("zoom-cap");
+let lastFocus = null;
+function showZoom(src, alt, hue, cap) {
+  lastFocus = document.activeElement;
+  zoomCard.style.setProperty("--h", hue);
+  zoomCard.innerHTML = `<div class="face"><img src="${esc(src)}" alt="${esc(alt)}"></div>`;
+  zoomCap.hidden = !cap; zoomCap.innerHTML = cap || "";
+  zoom.hidden = false; document.getElementById("zoom-close").focus();
+}
+function openZoom(id) {
+  const c = cards.find(x => x.id === id); if (!c || !c.photo) return;
+  showZoom("/_blob/" + c.photo, `Photo de ma carte ${c.name} ${c.number}`, HUES[c.id] ?? 220, "");
+}
+function openDexZoom(st, c) {
+  showZoom(imgPath(st, c), `${c.name} ${c.num}`, BGS[bgIndex].hue,
+    `<span class="name">${esc(c.name)}</span><span class="sub">${esc(c.num)} · ${esc(st.name)} · ${esc(RNAME[c.rar] || c.rar)}</span><span class="price">${c.price != null ? fmt(c.price) : "—"}</span><span class="sub">${c.own ? "Dans ma collection" : "Il me manque cette carte"}</span>`);
+}
+function closeZoom() { zoom.hidden = true; zoomCard.innerHTML = ""; if (lastFocus && lastFocus.focus) lastFocus.focus(); }
+document.getElementById("zoom-close").addEventListener("click", closeZoom);
+zoom.addEventListener("click", e => { if (e.target === zoom || e.target.closest("#zoom-card")) closeZoom(); });
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && !zoom.hidden) closeZoom();
+  if ((e.key === "Enter" || e.key === " ") && e.target.matches && e.target.matches(".holo[data-zoom]")) { e.preventDefault(); openZoom(e.target.dataset.zoom); }
+});
+
+// ---------- Photos de la vitrine ----------
+async function shrink(file) {
+  try {
+    const bmp = await createImageBitmap(file);
+    const scale = Math.min(1, 1100 / Math.max(bmp.width, bmp.height));
+    const cv = document.createElement("canvas");
+    cv.width = Math.round(bmp.width * scale); cv.height = Math.round(bmp.height * scale);
+    cv.getContext("2d").drawImage(bmp, 0, 0, cv.width, cv.height);
+    return await new Promise(r => cv.toBlob(b => r(b || file), "image/jpeg", 0.86));
+  } catch (e) { return file; }
+}
+const picker = document.getElementById("picker");
+let target = null;
+document.addEventListener("click", async e => {
+  const z = e.target.closest(".holo[data-zoom]");
+  if (z && !z.closest("#zoom")) { openZoom(z.dataset.zoom); return; }
+  const add = e.target.closest("[data-add]"), rem = e.target.closest("[data-remove]");
+  if (add && assets) { target = add.dataset.add; picker.value = ""; picker.click(); }
+  if (rem && db) {
+    const c = cards.find(x => x.id === rem.dataset.remove); if (!c) return;
+    const old = c.photo;
+    try { await db.doc("cards/" + c.id).update({ photo: null }); if (old && assets) await assets.delete(old).catch(() => {}); }
+    catch (err) { errors[c.id] = "La photo n'a pas pu être retirée. Réessayez dans un instant."; render(); }
+  }
+});
+picker.addEventListener("change", async () => {
+  const file = picker.files && picker.files[0]; if (!file || !target || !assets || !db) return;
+  const id = target; uploadingId = id; delete errors[id]; render();
+  const c = cards.find(x => x.id === id); const old = c && c.photo;
+  try {
+    const blob = await shrink(file);
+    const res = await assets.upload(blob, { type: blob.type && blob.type.startsWith("image/") ? undefined : "image/jpeg" });
+    await db.doc("cards/" + id).update({ photo: res.id });
+    if (old) assets.delete(old).catch(() => {});
+  } catch (err) {
+    const code = err && err.code;
+    errors[id] = code === "too_large" ? "Photo trop lourde. Essayez une photo plus petite."
+      : code === "unsupported_type" ? "Ce format n'est pas accepté. Utilisez une photo JPEG ou PNG."
+      : "L'envoi de la photo a échoué. Réessayez dans un instant.";
+  }
+  uploadingId = null; render();
+});
+
+// ---------- Onglets ----------
+const tabs = [["tab-cartes", "vitrine"], ["tab-graphiques", "charts"], ["tab-pokedex", "pokedex"]];
+function showTab(id) {
+  tabs.forEach(([t, p]) => { const on = t === id; document.getElementById(t).setAttribute("aria-selected", on); document.getElementById(p).hidden = !on; });
+  document.getElementById("note-vitrine").hidden = id === "tab-pokedex";
+  document.getElementById("note-dex").hidden = id !== "tab-pokedex";
+  try { localStorage.setItem("vue", id); } catch (e) {}
+}
+tabs.forEach(([t]) => document.getElementById(t).addEventListener("click", () => showTab(t)));
+if (location.hash === "#graphiques") showTab("tab-graphiques");
+else if (location.hash === "#pokedex") showTab("tab-pokedex");
+else { try { const v = localStorage.getItem("vue"); if (v && document.getElementById(v)) showTab(v); } catch (e) {} }
+
+// ---------- Prix du jour : lus depuis le dépôt GitHub (pokedex_prices.json) ----------
+const PRIX_URL = "https://raw.githubusercontent.com/Kira4194/pokemon-watch/main/pokedex_prices.json";
+const PRICE_SOURCE = "Cardmarket, prix de vente moyen (guide des prix officiel, relevé GitHub)";
+let mcp = null, syncStarted = false, syncRetried = false, syncMsg = "", syncAction = null;
+const firstLoad = { cards: false, sets: false };
+function setSync(text, action) { syncMsg = text || ""; syncAction = action || null; renderSync(); }
+function renderSync() {
+  const el = document.getElementById("sync");
+  if (!el) return;
+  el.hidden = !syncMsg;
+  el.innerHTML = esc(syncMsg) + (syncAction ? ` <button class="sync-btn" id="sync-btn">${esc(syncAction.label)}</button>` : "");
+}
+document.addEventListener("click", e => {
+  if (e.target && e.target.id === "sync-btn" && syncAction) { const a = syncAction; setSync(syncMsg); a.run(); }
+});
+
+
+async function syncFromGmail(fromClick) {
+  if (!db) return;
+  setSync("Recherche des prix du jour…");
+  let p;
+  try { p = await (await fetch(PRIX_URL, { cache: "no-cache" })).json(); }
+  catch (err) { return setSync("Prix indisponibles pour le moment : affichage du dernier relevé.", { label: "Réessayer", run: () => syncFromGmail(true) }); }
+  let n = 0;
+  for (const st of sets) {
+    const prix = (p.sets || {})[st.id]; if (!prix) continue;
+    let change = false;
+    const next = st.cards.map(c => {
+      const v = prix[String(c.n)];
+      if (v != null && v !== c.price) { change = true; return { ...c, price: v }; }
+      return { ...c };
+    });
+    if (change || st.priceDate !== p.date) {
+      n++;
+      try { await db.doc("sets/" + st.id).update({ cards: next, priceDate: p.date, priceSource: PRICE_SOURCE }); }
+      catch (err) { return setSync("Les nouveaux prix n'ont pas pu être enregistrés.", { label: "Réessayer", run: () => syncFromGmail(true) }); }
+    }
+  }
+  setSync("Prix du " + fmtDate(p.date) + " chargés");
+}
+
+// ---------- Base locale (remplace la base de l'artefact) : données dans le navigateur ----------
+const localDb = (() => {
+  const listeners = { sets: [], cards: [] };
+  let store = null;
+  const load = async () => {
+    if (store) return store;
+    try { store = JSON.parse(localStorage.getItem("pokedex-db-v1")); } catch (e) { store = null; }
+    if (!store) {
+      const [s, v] = await Promise.all([fetch("data/sets.json").then(r => r.json()), fetch("data/vitrine.json").then(r => r.json())]);
+      store = { sets: Object.fromEntries(s.map(x => [x.id, x])), cards: Object.fromEntries(v.map(x => [x.id, x])) };
+    }
+    return store;
+  };
+  const sauver = () => { try { localStorage.setItem("pokedex-db-v1", JSON.stringify(store)); } catch (e) {} };
+  const instantane = col => ({ docs: Object.entries(store[col]).map(([id, data]) => ({ id, data: () => JSON.parse(JSON.stringify(data)) })) });
+  return {
+    collection: col => ({
+      onSnapshot: (cb, errCb) => { listeners[col].push(cb); load().then(() => cb(instantane(col))).catch(e => errCb && errCb(e)); }
+    }),
+    doc: path => {
+      const [col, id] = path.split("/");
+      return { update: async data => {
+        await load();
+        store[col][id] = { ...(store[col][id] || {}), ...data };
+        sauver();
+        listeners[col].forEach(cb => cb(instantane(col)));
+      } };
+    }
+  };
+})();
+window.claude = { use: async nom => (nom === "db" ? localDb : null) };
+
+async function maybeStartSync(which) {
+  firstLoad[which] = true;
+  if (syncStarted || !firstLoad.cards || !firstLoad.sets) return;
+  syncStarted = true;
+  mcp = await window.claude.use("mcp");
+  syncFromGmail(false);
+}
+
+// ---------- Données ----------
+(async () => {
+  db = window.claude ? await window.claude.use("db") : null;
+  if (!db) {
+    document.getElementById("vitrine").innerHTML = `<div class="empty-state glass">Les relevés ne sont pas accessibles depuis cet affichage. Ouvrez la page connecté à votre compte Claude.</div>`;
+    renderDex(); return;
+  }
+  db.collection("cards").onSnapshot(snap => {
+    cards = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+    render();
+    maybeStartSync("cards");
+  }, () => { document.getElementById("vitrine").innerHTML = `<div class="empty-state glass">Impossible de charger la vitrine pour le moment. Rechargez la page dans quelques instants.</div>`; });
+  db.collection("sets").onSnapshot(snap => {
+    sets = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+    renderDex();
+    maybeStartSync("sets");
+  }, () => { document.getElementById("dex-list").innerHTML = `<div class="empty-state glass">Impossible de charger le Pokédex pour le moment. Rechargez la page dans quelques instants.</div>`; });
+  assets = await window.claude.use("assets");
+  if (assets) render();
+})();
+</script>
+
+</body></html>

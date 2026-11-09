@@ -195,6 +195,10 @@ details[open] summary::before { content: "− "; }
 .grid-dex { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 14px 12px; }
 .dc { font: inherit; color: var(--ink); background: none; border: 0; padding: 0; text-align: left; display: grid; gap: 6px; min-width: 0; cursor: zoom-in; }
 .dc .pic { position: relative; aspect-ratio: 214 / 298; max-width: 100%; border-radius: 6.5% / 4.7%; overflow: hidden; background: rgba(0,0,0,.3); box-shadow: 0 10px 22px -12px rgba(0,0,0,.8); transition: transform .15s ease; }
+.dc .pic .ph-card { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 8px; text-align: center; background: linear-gradient(160deg, hsl(var(--h, 220) 60% 38%), hsl(var(--h, 220) 50% 16%)); color: #fff; }
+.dc .pic .ph-name { font-size: 13px; font-weight: 700; line-height: 1.15; }
+.dc .pic .ph-num { font-size: 11px; opacity: .8; }
+.ph-face { display: flex; align-items: center; justify-content: center; padding: 24px; text-align: center; background: linear-gradient(160deg, hsl(var(--h, 220) 60% 38%), hsl(var(--h, 220) 50% 16%)); color: #fff; font-size: 26px; font-weight: 700; }
 .dc .pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .dc:hover .pic { transform: translateY(-3px); }
 .dc .meta { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 10px; background: color-mix(in srgb, var(--panel) 78%, transparent); border: 1px solid var(--edge); }
@@ -510,7 +514,7 @@ function imgPath(st, c) { return `img/${st.id}/${String(c.n).padStart(3, "0")}.w
 function tile(st, c, seen) {
   const label = `${c.name} ${c.num}, ${c.own ? "possédée" : "manquante"}${c.price != null ? ", " + fmt(c.price) : ""}`;
   return `<button class="dc${c.own ? "" : " miss"}" data-card="${esc(st.id)}:${c.n}" aria-label="${esc(label)}${dexEdit ? ". Toucher pour changer." : ". Agrandir."}"${dexEdit ? ` aria-pressed="${!!c.own}"` : ""}>
-    <span class="pic"><img src="${imgPath(st, c)}" alt="" loading="lazy" decoding="async" onerror="this.style.display='none'">${seen ? '<span class="seen">Suivie</span>' : ""}</span>
+    <span class="pic"><span class="ph-card"><span class="ph-name">${esc(c.name)}</span><span class="ph-num">${esc(c.num)}</span></span>${seen ? '<span class="seen">Suivie</span>' : ""}</span>
     <span class="meta"><span class="no">${esc(c.num)}</span><span class="pr">${c.price != null ? fmt(c.price) : "—"}</span></span>
   </button>`;
 }
@@ -559,7 +563,7 @@ let lastFocus = null;
 function showZoom(src, alt, hue, cap) {
   lastFocus = document.activeElement;
   zoomCard.style.setProperty("--h", hue);
-  zoomCard.innerHTML = `<div class="face"><img src="${esc(src)}" alt="${esc(alt)}"></div>`;
+  zoomCard.innerHTML = src ? `<div class="face"><img src="${esc(src)}" alt="${esc(alt)}"></div>` : `<div class="face ph-face"><span class="ph-name">${esc(alt)}</span></div>`;
   zoomCap.hidden = !cap; zoomCap.innerHTML = cap || "";
   zoom.hidden = false; document.getElementById("zoom-close").focus();
 }
@@ -568,7 +572,7 @@ function openZoom(id) {
   showZoom(c.photo, `Photo de ma carte ${c.name} ${c.number}`, HUES[c.id] ?? 220, "");
 }
 function openDexZoom(st, c) {
-  showZoom(imgPath(st, c), `${c.name} ${c.num}`, BGS[bgIndex].hue,
+  showZoom(null, `${c.name} ${c.num}`, BGS[bgIndex].hue,
     `<span class="name">${esc(c.name)}</span><span class="sub">${esc(c.num)} · ${esc(st.name)} · ${esc(RNAME[c.rar] || c.rar)}</span><span class="price">${c.price != null ? fmt(c.price) : "—"}</span><span class="sub">${c.own ? "Dans ma collection" : "Il me manque cette carte"}</span>`);
 }
 function closeZoom() { zoom.hidden = true; zoomCard.innerHTML = ""; if (lastFocus && lastFocus.focus) lastFocus.focus(); }

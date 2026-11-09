@@ -510,11 +510,39 @@ function renderDex() {
   document.querySelectorAll(".chip[data-f]").forEach(b => b.setAttribute("aria-pressed", b.dataset.f === dexFilter));
   document.querySelectorAll(".chip[data-s]").forEach(b => b.setAttribute("aria-pressed", b.dataset.s === dexSort));
 }
+// ---------- Images des cartes (API pokemontcg.io, par nom et numéro) ----------
+const API_SETS = { "30C": ["me55", "me55c"], "NN": ["me5"], "ME": ["me1"] };
+const cardImgs = {}, imgEnCours = {};
+const normNom = s => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+const numPart = s => String(s || "").split("/")[0].replace(/^0+/, "");
+function appliquerImages(st, map) {
+  st.cards.forEach(c => { const u = map[normNom(c.name) + "|" + numPart(c.num)]; if (u) cardImgs[st.id + ":" + c.n] = u; });
+  renderDex();
+}
+async function chargerImages(st) {
+  if (!API_SETS[st.id] || imgEnCours[st.id]) return;
+  imgEnCours[st.id] = true;
+  const cle = "pokedex-img-" + st.id;
+  let cache = null;
+  try { cache = JSON.parse(localStorage.getItem(cle) || "null"); } catch (e) {}
+  if (cache && Date.now() - cache.t < 864e5) { appliquerImages(st, cache.map); return; }
+  const map = {};
+  try {
+    for (const id of API_SETS[st.id]) {
+      const r = await fetch(`https://api.pokemontcg.io/v2/cards?q=set.id:${id}&select=name,number,images&pageSize=250`);
+      if (!r.ok) throw new Error(String(r.status));
+      const j = await r.json();
+      for (const k of j.data) map[normNom(k.name) + "|" + numPart(k.number)] = (k.images && (k.images.large || k.images.small)) || null;
+    }
+  } catch (e) { imgEnCours[st.id] = false; return; }
+  try { localStorage.setItem(cle, JSON.stringify({ t: Date.now(), map })); } catch (e) {}
+  appliquerImages(st, map);
+}
 function imgPath(st, c) { return `img/${st.id}/${String(c.n).padStart(3, "0")}.webp?v=hd`; }
 function tile(st, c, seen) {
   const label = `${c.name} ${c.num}, ${c.own ? "possédée" : "manquante"}${c.price != null ? ", " + fmt(c.price) : ""}`;
   return `<button class="dc${c.own ? "" : " miss"}" data-card="${esc(st.id)}:${c.n}" aria-label="${esc(label)}${dexEdit ? ". Toucher pour changer." : ". Agrandir."}"${dexEdit ? ` aria-pressed="${!!c.own}"` : ""}>
-    <span class="pic"><span class="ph-card"><span class="ph-name">${esc(c.name)}</span><span class="ph-num">${esc(c.num)}</span></span>${seen ? '<span class="seen">Suivie</span>' : ""}</span>
+    <span class="pic">${cardImgs[st.id + ":" + c.n] ? `<img src="${esc(cardImgs[st.id + ":" + c.n])}" alt="" loading="lazy" decoding="async" onerror="this.style.display='none'">` : `<span class="ph-card"><span class="ph-name">${esc(c.name)}</span><span class="ph-num">${esc(c.num)}</span></span>`}${seen ? '<span class="seen">Suivie</span>' : ""}</span>
     <span class="meta"><span class="no">${esc(c.num)}</span><span class="pr">${c.price != null ? fmt(c.price) : "—"}</span></span>
   </button>`;
 }
@@ -572,7 +600,7 @@ function openZoom(id) {
   showZoom(c.photo, `Photo de ma carte ${c.name} ${c.number}`, HUES[c.id] ?? 220, "");
 }
 function openDexZoom(st, c) {
-  showZoom(null, `${c.name} ${c.num}`, BGS[bgIndex].hue,
+  showZoom(cardImgs[st.id + ":" + c.n] || null, `${c.name} ${c.num}`, BGS[bgIndex].hue,
     `<span class="name">${esc(c.name)}</span><span class="sub">${esc(c.num)} · ${esc(st.name)} · ${esc(RNAME[c.rar] || c.rar)}</span><span class="price">${c.price != null ? fmt(c.price) : "—"}</span><span class="sub">${c.own ? "Dans ma collection" : "Il me manque cette carte"}</span>`);
 }
 function closeZoom() { zoom.hidden = true; zoomCard.innerHTML = ""; if (lastFocus && lastFocus.focus) lastFocus.focus(); }
@@ -736,6 +764,7 @@ async function maybeStartSync(which) {
   db.collection("sets").onSnapshot(snap => {
     sets = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
     renderDex();
+    sets.forEach(chargerImages);
     maybeStartSync("sets");
   }, () => { document.getElementById("dex-list").innerHTML = `<div class="empty-state glass">Impossible de charger le Pokédex pour le moment. Rechargez la page dans quelques instants.</div>`; });
   assets = await window.claude.use("assets");

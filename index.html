@@ -516,23 +516,28 @@ const cardImgs = {}, imgEnCours = {};
 const normNom = s => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
 const numPart = s => String(s || "").split("/")[0].replace(/^0+/, "");
 function appliquerImages(st, map) {
-  st.cards.forEach(c => { const u = map[normNom(c.name) + "|" + numPart(c.num)]; if (u) cardImgs[st.id + ":" + c.n] = u; });
+  st.cards.forEach(c => { const u = map[normNom(c.name) + "|" + numPart(c.num)] || map[normNom(c.name)]; if (u) cardImgs[st.id + ":" + c.n] = u; });
   renderDex();
 }
 async function chargerImages(st) {
   if (!API_SETS[st.id] || imgEnCours[st.id]) return;
   imgEnCours[st.id] = true;
-  const cle = "pokedex-img-" + st.id;
+  const cle = "pokedex-img-v2-" + st.id;
   let cache = null;
   try { cache = JSON.parse(localStorage.getItem(cle) || "null"); } catch (e) {}
   if (cache && Date.now() - cache.t < 864e5) { appliquerImages(st, cache.map); return; }
-  const map = {};
+  const map = {}, nb = {};
   try {
     for (const id of API_SETS[st.id]) {
       const r = await fetch(`https://api.pokemontcg.io/v2/cards?q=set.id:${id}&select=name,number,images&pageSize=250`);
       if (!r.ok) throw new Error(String(r.status));
       const j = await r.json();
-      for (const k of j.data) map[normNom(k.name) + "|" + numPart(k.number)] = (k.images && (k.images.large || k.images.small)) || null;
+      for (const k of j.data) {
+        const u = (k.images && (k.images.large || k.images.small)) || null, n = normNom(k.name);
+        map[n + "|" + numPart(k.number)] = u;
+        nb[n] = (nb[n] || 0) + 1;
+        if (nb[n] === 1) map[n] = u; else delete map[n];
+      }
     }
   } catch (e) { imgEnCours[st.id] = false; return; }
   try { localStorage.setItem(cle, JSON.stringify({ t: Date.now(), map })); } catch (e) {}
